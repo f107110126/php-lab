@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    RewriteCond $0 ^(src/|README.md|\..*) [NC]
+    RewriteRule .* 404 [L]
+
+</IfModule>
