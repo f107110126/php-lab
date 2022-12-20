@@ -4,6 +4,35 @@ if (!defined('DEBUG')) {
     define('DEBUG', false);
 }
 
+if (!function_exists('clearLog')) {
+    function clearLog() {
+        $statusDir = 'storage';
+        $statusFile = 'log';
+        $statusPath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $statusFile;
+        checkDir("{$statusDir}", true);
+        $statusPath = __DIR__ . DIRECTORY_SEPARATOR . $statusPath;
+        // since 'w' mode will truncate the file to zero length, that is not what we want
+        // we want keep it content
+        fclose(fopen("{$statusPath}", "w")); // to ensure the file exists
+    }
+}
+
+if (!function_exists('recordLog')) {
+    function recordLog($message) {
+        $statusDir = 'storage';
+        $statusFile = 'log';
+        $statusPath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $statusFile;
+        checkDir("{$statusDir}", true);
+        $statusPath = __DIR__ . DIRECTORY_SEPARATOR . $statusPath;
+        // since 'w' mode will truncate the file to zero length, that is not what we want
+        // we want keep it content
+        $handler = fopen("{$statusPath}", "a"); // to ensure the file exists
+        $now = new DateTime();
+        fwrite($handler, "[{$now->format('Y-m-d H:i:s')}] {$message}\n");
+        fclose($handler);
+    }
+}
+
 if (!function_exists('allStatus')) {
     function allStatus()
     {
