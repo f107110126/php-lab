@@ -24,6 +24,7 @@ if (isset($_GET['cmd'])) {
 
 print "normal execution\n";
 $start = new DateTime();
+$first_date = new DateTime($start->format('Y-m-d H:i:s'));
 recordLog('socket server is started.');
 // about AF_INET: https://spyker729.blogspot.com/2010/07/afinetpfinet.html
 $socketResource = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -34,6 +35,11 @@ socket_listen($socketResource);
 $clientSocketArray = [$socketResource];
 // recordLog('before loop, now Resources are: ' . print_r($clientSocketArray, true));
 while (readStatus('enable')) {
+    $diff = (new DateTime())->diff($first_date);
+    if (($diff->i * 60 + $diff->s) > 5) {
+        $first_date = new DateTime();
+        recordLog('Server is executing');
+    }
     $newClientSocketArray = $clientSocketArray;
     // here new client array will include itself created peer
     // recordLog('before socket_select, now newResources are: ' . print_r($newClientSocketArray, true));
