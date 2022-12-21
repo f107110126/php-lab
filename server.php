@@ -9,7 +9,7 @@ set_time_limit(0);
 
 require_once 'src/functions.php';
 
-header('Content-Type: text/plain');
+header('Content-Type: text/plain; charset=utf-8');
 
 if (isset($_GET['enable'])) {
     if ($_GET['enable'] === 'true') writeStatus('enable', true);
@@ -78,16 +78,31 @@ print "Start at: {$start->format('Y-m-d H:i:s')}\n";
 print "End at: {$end->format('Y-m-d H:i:s')}\n";
 
 if (false) {
-    for ($i = 0; $i < 10; $i++) {
+    clearLog();
+    $ob_st = null;
+    $ob_f = null;
+    // $ob_st = ob_start() === true ? 'true' : 'false';
+    for ($i = 0; $i < 25; $i++) {
+        $rad = rand() * rand();
         // print partial output, refs: https://stackoverflow.com/questions/20718531/
-        print "{$i}\n"; // adding a newline may be important here,
+        print "{$i} {$rad}\n"; // adding a newline may be important here,
         // a lot of io routines use some variant of get_line()
         // failed to delete, refs: https://stackoverflow.com/questions/14549110/
         if (ob_get_length()) ob_end_flush(); // to get php's internal buffers out into the operating system
+        else print "output buffer is empty.\n";
+
+        // the content printed by php will saved at output_buffer in normal situation
+        // ob_flush(): print everything stored at php output_buffer, but not to client
+        // flush(): print everything that server prepared to print, but not output_buffer of php
+        print 'before ob_flush.' . "\n";
+        if (ob_get_length()) $ob_f = ob_flush() === true ? 'true' : 'false';
+        print 'before flush' . "\n";
         flush(); // not really work
+        usleep(200000);
+        recordLog("obs: {$ob_st} / obf: {$ob_f}");
     }
     $enable = readStatus('enable') === true ? 'true' : null;
     $enable = readStatus('enable') === false ? 'false' : $enable;
-    print "{$i} enable = ${enable}\n";
-    sleep(1);
+    // print "{$i} enable = ${enable}\n";
+    // sleep(1);
 }
