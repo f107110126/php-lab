@@ -4,8 +4,19 @@ if (!defined('DEBUG')) {
     define('DEBUG', false);
 }
 
+if (!function_exists('sendEvent')) {
+    function sendEvent($message = null, $final = false)
+    {
+        if ($message) print "data: {$message}\n";
+        if ($final) print "\n\n";
+        if (ob_get_length()) ob_flush();
+        flush();
+    }
+}
+
 if (!function_exists('clearLog')) {
-    function clearLog() {
+    function clearLog()
+    {
         $statusDir = 'storage';
         $statusFile = 'log';
         $statusPath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $statusFile;
@@ -18,7 +29,8 @@ if (!function_exists('clearLog')) {
 }
 
 if (!function_exists('recordLog')) {
-    function recordLog($message) {
+    function recordLog($message)
+    {
         $statusDir = 'storage';
         $statusFile = 'log';
         $statusPath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $statusFile;
@@ -73,10 +85,10 @@ if (!function_exists('readStatus')) {
 }
 
 if (!function_exists('writeStatus')) {
-    function writeStatus($key, $value = '')
+    function writeStatus($key, $value = null)
     {
         $status = allStatus();
-        $status[$key] = $value;
+        if ($value !== null) $status[$key] = $value;
         $statusDir = 'storage';
         $statusFile = 'status';
         $statusPath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $statusFile;
@@ -95,7 +107,8 @@ if (!function_exists('writeStatus')) {
 }
 
 if (!function_exists('clearStatus')) {
-    function clearStatus() {
+    function clearStatus()
+    {
         $statusDir = 'storage';
         $statusFile = 'status';
         $statusPath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $statusFile;
@@ -117,5 +130,32 @@ if (!function_exists('checkDir')) {
             $result = file_exists($internalDir) && is_dir($internalDir);
         }
         return $result;
+    }
+}
+
+if (!function_exists('storeVariable')) {
+    function storeVariable($filename, $variable = null)
+    {
+        $statusDir = 'storage';
+        $storePath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $filename;
+        $storePath = __DIR__ . DIRECTORY_SEPARATOR . $storePath;
+        if ($filename && $variable) {
+            return file_put_contents($storePath, serialize($variable));
+        }
+        if ($filename && file_exists("{$storePath}") && $variable === null) {
+            return unlink("{$storePath}");
+        }
+    }
+}
+
+if (!function_exists('retrieveVariable')) {
+    function retrieveVariable($filename)
+    {
+        if ($filename) {
+            $statusDir = 'storage';
+            $storePath = ($statusDir ?: '') . DIRECTORY_SEPARATOR . $filename;
+            $storePath = __DIR__ . DIRECTORY_SEPARATOR . $storePath;
+            if (file_exists($storePath)) return unserialize(file_get_contents($storePath));
+        }
     }
 }
