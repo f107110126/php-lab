@@ -82,27 +82,28 @@ $parseData = json_encode([
     $(document).on('click', 'button#serviceSwitch', (event) => {
         connectStatus().then(result => {
             if (result) {
-                fetch('server.php?enable=false')
-                    .then(response => connectStatus().then(updateHTML))
+                (async () => {
+                    await fetch('server.php?enable=false');
+                    updateHTML(await connectStatus());
+                })();
             } else {
-                fetch('server.php?enable=true')
-                    .then(response => {
-                        let eventSource = new EventSource('server.php'),
-                            checked = false;
-                        eventSource.onopen = (...args) => console.log('es is open', args);
-                        eventSource.onmessage = (...args) => {
-                            if (checked === false) {
-                                connectStatus().then(updateHTML);
-                                checked = true;
-                            }
-                            return console.log('es receive message', args);
-                        };
-                        eventSource.onerror = (...args) => {
+                (async () => {
+                    await fetch('server.php?enable=true');
+                    let eventSource = new EventSource('server.php')
+                    eventSource.onopen = (...args) => console.log('es is open', args);
+                    eventSource.onmessage = async (event) => {
+                        if (event.data === 'socket server is started.') {
                             eventSource.close();
-                            connectStatus().then(updateHTML);
-                            return console.log('es encounter error', args);
-                        };
-                    })
+                            updateHTML(await connectStatus());
+                        }
+                        return console.log('es receive message', args);
+                    };
+                    eventSource.onerror = (...args) => {
+                        eventSource.close();
+                        connectStatus().then(updateHTML);
+                        return console.log('es encounter error', args);
+                    };
+                })();
             }
         });
     });

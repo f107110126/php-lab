@@ -20,6 +20,12 @@ if (isset($_GET['enable'])) {
     return;
 }
 
+if (isset($_GET['print'])) {
+    if ($_GET['print'] === 'true') writeStatus('print', true);
+    if ($_GET['print'] === 'false') writeStatus('print', false);
+    return;
+}
+
 if (isset($_GET['cmd'])) {
     if ($_GET['cmd'] === 'clear') clearLog();
     return;
@@ -47,6 +53,7 @@ $chatHandler = new ChatHandler();
 $clientSocketArray = [$socketResource];
 // recordLog('before loop, now Resources are: ' . print_r($clientSocketArray, true));
 while (readStatus('enable')) {
+    $print = readStatus('print');
     $newClientSocketArray = $clientSocketArray;
     $oldClientSocketArray = $clientSocketArray;
     // here new client array will include itself created peer
@@ -60,13 +67,13 @@ while (readStatus('enable')) {
     $diff = (new DateTime())->diff($first_date);
     if (($diff->i * 60 + $diff->s) > 5) {
         $first_date = new DateTime();
-        recordLog('Server is executing');
+        recordLog('Server is executing', true);
         // recordLog('Server Status: ' . print_r([
         //         'clientSocketArray' => $clientSocketArray,
         //         'newClientSocketArray' => $newClientSocketArray,
         //         'oldClientSocketArray' => $oldClientSocketArray,
         //     ], true));
-        sendEvent('Service is executing', true);
+        if ($print) sendEvent('Service is executing', true);
         // print "data: Service is executing\n";
         // if (ob_get_length()) ob_flush();
         // flush(); // not really work
@@ -96,7 +103,7 @@ while (readStatus('enable')) {
 
         } else {
             recordLog('Invalid connection, abandon.');
-            sendEvent('Invalid connection, abandon.', true);
+            if ($print) sendEvent('Invalid connection, abandon.', true);
             socket_close($newSocket);
         }
 
