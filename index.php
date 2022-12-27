@@ -47,10 +47,11 @@ $parseData = json_encode([
     </div>
 </div>
 <script>
-    let {host, port} = JSON.parse('<?=$parseData?>');
+    let {port} = JSON.parse('<?=$parseData?>'),
+        currentURL = new URL(document.URL),
+        {protocol, host} = currentURL;
     const connectStatus = () => {
             return (new Promise((resolve, reject) => {
-                let protocol = (new URL(document.URL)).protocol;
                 fetch(`${protocol}//${host}:${port}`)
                     // fetch(`client.php`)
                     .then(response => {

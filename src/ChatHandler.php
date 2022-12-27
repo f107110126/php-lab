@@ -25,6 +25,10 @@ class ChatHandler
         foreach ($lines as $line) {
             $line = chop($line);
             $test = preg_match('/\A(\S+): (.*)\z/', $line, $matches);
+            // recordLog(print_r([
+            //     'test' => $test === 1 ? 'true' : 'false',
+            //     'line' => $line
+            // ], true));
             // $test = preg_match('/\A((.*))\z/', $line, $matches);
             // $test = preg_match('/^((.*))$/', $line, $matches);
             // recordLog("line: {$line}\n" . "test: " . ($test === 1 ? 'true' : ($test === 0 ? 'false' : 'error')) . "\n");
@@ -52,7 +56,9 @@ class ChatHandler
         //     return;
         // }
 
-        $valid = key_exists('Sec-WebSocket-Key', $headers);
+        $valid = array_key_exists('Sec-WebSocket-Key', $headers) &&
+            array_key_exists('Origin', $headers) &&
+            array_key_exists('Host', $headers);
         if ($valid) {
             $secKey = $headers['Sec-WebSocket-Key'];
             // this is a magic string, refers: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers
@@ -61,7 +67,7 @@ class ChatHandler
             $buffer = "HTTP/1.1 101 Web Socket Protocol Handshake\r\n" .
                 "Upgrade: websocket\r\n" .
                 "Connection: Upgrade\r\n" .
-                "WebSocket-Origin: {$hostname}\r\n" .
+                "WebSocket-Origin: {$headers['Origin']}\r\n" .
                 "WebSocket-Location: ws://{$hostname}:{$port}\r\n" .
                 "Sec-WebSocket-Accept: {$secAccept}\r\n" .
                 "\r\n";

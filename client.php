@@ -46,16 +46,23 @@
     </div>
 </div>
 <script>
+
     function showMessage(message) {
         $('textarea#chat-room').html(`${$('textarea#chat-room').html()}${message}\n`);
     }
 
     $(document).ready(function () {
+        let currentURL = new URL(document.URL),
+            ws = {
+                protocol: currentURL.protocol === 'https:' ? 'wss:' : 'ws:',
+                host: currentURL.host,
+                port: 8090
+            };
         // ws://127.0.0.1:8090/demo/php-socket.php
         // ws://127.0.0.1:8090
         // above are totally same
         // server will create a service on the listened port, don't care the uri
-        let websocket = new WebSocket('ws://127.0.0.1:8090/demo/php-socket.php');
+        let websocket = new WebSocket(`${ws.protocol}${ws.host}:${ws.port}/demo/php-socket.php`);
         websocket.onopen = function (...params) {
             showMessage('socket is open.');
             console.log(params);
